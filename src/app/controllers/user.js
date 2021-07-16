@@ -76,10 +76,26 @@ module.exports = {
 
     return res.render("user/recipes", {recipes})
   },
-  chefs(req, res) {
-    Chefs.all(chefs => {
-        return res.render("user/chefs", {chefs})
-    })
+  async chefs(req, res) {
+    let files = []
+    let result = await Chefs.all()
+    const chefs = result.rows
+
+    result = chefs.map(async chef => await File.findFileForId(chef.file_id))
+    
+    let file = await Promise.all(result)
+    file.map(newFile => newFile.rows.map(rows => files.push(rows)))
+    files.map(file => file.src = `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
+    
+    for (chef in chefs) {
+      chefs[chef] = {
+        ...chefs[chef],
+        path: files[chef].path,
+        src: files[chef].src
+      }
+    }
+
+    return res.render("user/chefs", {chefs, files})
   },
   async search (req, res) {
     let {filter} = req.query
