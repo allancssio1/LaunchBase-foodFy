@@ -8,15 +8,17 @@ module.exports = {
       ORDER BY recipes.created_at DESC
       `)
   },
-  findBy(filter, callback) {
-    db.query(`SELECT recipes.*, chefs.name AS chef_name FROM recipes
-      LEFT JOIN chefs ON (chefs.id = recipes.chef_id)
-      WHERE recipes.title ILIKE '%${filter}%'`,
-      (err, results) => {
-        if (err) throw `Database error ${err}`
-        callback(results.rows)
-      }  
-    )
+  filter(filter) {
+    try {
+      return db.query(`
+        SELECT recipes.*,
+        chefs.name AS chef_name FROM recipes
+        LEFT JOIN chefs ON (chefs.id = recipes.chef_id)
+        WHERE recipes.title ILIKE '%${filter}%'`  
+      )
+    } catch (err) {
+      console.error(err)
+    }
   },
   find(id) {
     return db.query(`
@@ -26,7 +28,7 @@ module.exports = {
     `, [id]
     )
   },
-  findRecipeForChef(id) { //NÃO ESTÁ DEVOLVENDO TODAS AS RECEITAS QUE O CHEFE TEM
+  findRecipeForChef(id) {
     try {
       return db.query(`SELECT * FROM recipes WHERE recipes.chef_id = $1`, [id])
 

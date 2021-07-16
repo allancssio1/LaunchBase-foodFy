@@ -5,7 +5,6 @@ const recipes = require('./app/controllers/recipes')
 const user = require('./app/controllers/user')
 const chefs = require('./app/controllers/chefs')
 
-routes.get('/', user.index)
 
 routes.get("/admin/recipes", recipes.index) 
 routes.get("/admin/recipes/create", recipes.create)
@@ -23,7 +22,7 @@ routes.post("/admin/chefs", multer.single('avatar', 1), chefs.post)
 routes.put("/admin/chefs", multer.single('avatar', 1), chefs.put)
 routes.delete("/admin/chefs", chefs.delete)
 
-// routes.get("/index", )
+routes.get('/', user.index)
 routes.get("/about", user.about)
 routes.get("/recipes", user.recipes)
 routes.get("/chefs", user.chefs)

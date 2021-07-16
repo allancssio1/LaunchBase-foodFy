@@ -73,35 +73,68 @@ module.exports = {
         chef_name: chefs[index].name
       }
     }
-    // let {filter} = req.query
-    // if (filter) {
-    //   Recipes.findBy(filter, recipes => {
-    //     return res.render("user/results", {results})
-    //   })
-    // } else if(!filter) {
-    //   Recipes.all(recipes => {
-      //   })
-      // }
-          return res.render("user/recipes", {recipes})
+
+    return res.render("user/recipes", {recipes})
   },
   chefs(req, res) {
     Chefs.all(chefs => {
         return res.render("user/chefs", {chefs})
     })
   },
-  search (req, res) {
+  async search (req, res) {
     let {filter} = req.query
-    if (!filter) {
+
+    if(!filter) {
       return res.render("user/nofound")
-    } else {
-      Recipes.findBy(filter, recipes => {
-        return res.render("user/results", {recipes, filter})
-      })
+    }
+
+    if(filter) {
+      
+      let results = await Recipes.filter(filter)
+      const recipes = await Promise.all(results.rows) 
+
+      if(recipes == "") {
+        return res.render('user/nofound')
+      }
+
+      results = recipes.map(recipe => RecipeAndFiles.findRecipeId(recipe.id))
+      const filesPromise = await Promise.all(results)
+      const tableRecipeAndFiles = filesPromise.map(filePromise => filePromise.rows[0])
+
+      results = tableRecipeAndFiles.map(unicRecipeAndFile => File.findFileForId(unicRecipeAndFile.file_id))
+      let files = await Promise.all(results)
+      files = files.map(file => file.rows[0])
+      
+      for (index in recipes) {
+        recipes[index] ={
+          ...recipes[index],
+          src: `${req.protocol}://${req.headers.host}${files[index].path.replace("public", "")}`,
+          path: files[index].path
+        }
+      }
+
+      return res.render("user/results", {recipes})
     }
   },
-  show (req, res) {
-    Recipes.find(req.params.id, recipe => {
-      return res.render("user/show", {recipe})
-    })
+  async show (req, res) {
+    let result = await Recipes.find(req.params.id) 
+    const recipe = result.rows[0]
+      
+    if (!recipe) 
+      return res.render('user/nofound')
+
+    result = await RecipeAndFiles.findRecipeId(recipe.id)
+
+    const getFilesPromise = result.rows.map(file => {
+      return File.findFileForId(file.file_id)
+    } )
+
+    const filesPromise = await Promise.all(getFilesPromise)
+    const files = filesPromise.map(file => ({
+      ...file.rows,
+      src: `${req.protocol}://${req.headers.host}${file.rows['0'].path.replace("public", "")}`
+    }))
+
+    return res.render('user/show', { recipe, files })
   }
 }

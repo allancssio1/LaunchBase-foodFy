@@ -3,8 +3,24 @@
 {% block content %}
 <section class="card-recipes">
   
-  <div id="image-recipe">
-    <img src="{{recipe.src}}" alt="{{recipe.title}}">
+  <div class="images-container">
+    <div id="image-recipe">
+      <img src="{{files[0].src}}" alt="{{recipe.title}}">
+    </div>
+    <div class="container-images-gallery">
+      <div class="images-gallery">
+        {% for file in files %}
+          <img
+            src="{{file.src}}"
+            alt="{{file.name}}"
+            {% if loop.index0 == 0 %}
+              class="active"
+            {% endif %}
+            onclick="ImageGallery.setImage(event)"
+            >
+        {% endfor %}
+      </div>
+    </div>
   </div>
   
   <article class="recipe-title">
@@ -52,7 +68,7 @@
       </div>
   </main>
 
-  {% include 'scriptShow.njk' %}
+  {# {% include 'scriptShow.njk' %} #}
   
 </section>
 {% endblock  %}
