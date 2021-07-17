@@ -28,5 +28,6 @@ routes.get("/recipes", user.recipes)
 routes.get("/chefs", user.chefs)
 routes.get("/recipes/search", user.search)
 routes.get("/recipes/:id", user.show)
+routes.get("/chef/:id", user.showChef)
 
 module.exports = routes

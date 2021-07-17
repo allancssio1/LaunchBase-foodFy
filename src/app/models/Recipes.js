@@ -30,7 +30,12 @@ module.exports = {
   },
   findRecipeForChef(id) {
     try {
-      return db.query(`SELECT * FROM recipes WHERE recipes.chef_id = $1`, [id])
+      return db.query(`
+        SELECT * FROM recipes 
+        WHERE recipes.chef_id = $1
+        ORDER BY recipes.created_at DESC
+        `, [id]
+      )
 
     } catch (error) {
       console.log(error)
