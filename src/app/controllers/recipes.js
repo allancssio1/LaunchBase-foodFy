@@ -76,7 +76,7 @@ module.exports = {
       ...file.rows,
       src: `${req.protocol}://${req.headers.host}${file.rows['0'].path.replace("public", "")}`
     }))
-
+    
     return res.render('admin/recipes/show', { recipe, files })
   },
   async edit (req, res) {

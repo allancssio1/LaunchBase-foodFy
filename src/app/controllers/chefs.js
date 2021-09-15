@@ -10,7 +10,7 @@ module.exports = {
     const chefs = result.rows
 
     result = chefs.map(async chef => await File.findFileForId(chef.file_id))
-    
+
     let file = await Promise.all(result)
     file.map(newFile => newFile.rows.map(rows => files.push(rows)))
     files.map(file => file.src = `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
